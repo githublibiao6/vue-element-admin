@@ -1,5 +1,6 @@
 export default {
   route: {
+    changtan: '畅谈',
     dashboard: '首页',
     documentation: '文档',
     guide: '引导页',
@@ -65,7 +66,7 @@ export default {
     profile: '个人中心'
   },
   navbar: {
-    dashboard: '首页',
+    changtan: '畅谈',
     github: '项目地址',
     logOut: '退出登录',
     profile: '个人中心',

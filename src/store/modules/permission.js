@@ -20,7 +20,6 @@ function hasPermission(roles, route) {
  */
 export function filterAsyncRoutes(routes, roles) {
   const res = []
-
   routes.forEach(route => {
     const tmp = { ...route }
     if (hasPermission(roles, tmp)) {
@@ -50,6 +49,8 @@ const actions = {
   generateRoutes({ commit }, roles) {
     return new Promise(resolve => {
       let accessedRoutes
+      // 根据角色查询路径
+      console.log(roles)
       if (roles.includes('admin')) {
         accessedRoutes = asyncRoutes || []
       } else {

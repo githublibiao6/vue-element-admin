@@ -73,13 +73,28 @@ export const constantRoutes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
+    redirect: '/changtan',
     children: [
       {
-        path: 'dashboard',
+        path: 'changtan',
+        component: () => import('@/views/changtan/index'),
+        name: 'changtan',
+        // meta: { title: 'dashboard', icon: 'dashboard', affix: true }
+        meta: { title: 'changtan', icon: 'qq', affix: true }
+      }
+    ]
+  },
+  {
+    path: '/dashboard',
+    component: Layout,
+    // redirect: '/dashboard/index',// // 关闭重定向
+    children: [
+      {
+        path: 'index',
         component: () => import('@/views/dashboard/index'),
         name: 'Dashboard',
-        meta: { title: 'dashboard', icon: 'dashboard', affix: true }
+        // meta: { title: 'dashboard', icon: 'dashboard', affix: true }
+        meta: { title: 'dashboard', icon: 'dashboard' }
       }
     ]
   },
@@ -91,7 +106,8 @@ export const constantRoutes = [
         path: 'index',
         component: () => import('@/views/documentation/index'),
         name: 'Documentation',
-        meta: { title: 'documentation', icon: 'documentation', affix: true }
+        // meta: { title: 'documentation', icon: 'documentation', affix: true }
+        meta: { title: 'documentation', icon: 'documentation' }
       }
     ]
   },

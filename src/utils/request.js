@@ -3,9 +3,13 @@ import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
 
+// const qs = require('querystring')
+
 // create an axios instance
 const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
+  // baseURL: 'http://localhost:80/om',
+  baseURL: process.env.VUE_APP_BASE_API + '/vue-element-admin', // url = base url + request url
+  // http://localhost:80/om
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000 // request timeout
 })
@@ -21,6 +25,19 @@ service.interceptors.request.use(
       // please modify it according to the actual situation
       config.headers['X-Token'] = getToken()
     }
+    // console.log(config.method)
+    // if (config.method.toLowerCase() === 'get') {
+    //   config.params = config.data
+    // } else if (config.method.toLowerCase() === 'post') {
+    //   if (config.jsonData) {
+    //     config.headers['Content-Type'] = 'application/json;charset=UTF-8'
+    //     console.log(config.data)
+    //     config.data = JSON.stringify(config.data)
+    //   } else {
+    //     config.headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8'
+    //     config.data = qs.stringify(config.data)
+    //   }
+    // }
     return config
   },
   error => {
@@ -44,7 +61,6 @@ service.interceptors.response.use(
    */
   response => {
     const res = response.data
-
     // if the custom code is not 20000, it is judged as an error.
     if (res.code !== 20000) {
       Message({
