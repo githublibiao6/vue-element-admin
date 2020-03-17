@@ -7,8 +7,8 @@ import { getToken } from '@/utils/auth'
 
 // create an axios instance
 const service = axios.create({
-  // baseURL: 'http://localhost:80/om',
-  baseURL: process.env.VUE_APP_BASE_API + '/vue-element-admin', // url = base url + request url
+  baseURL: 'http://localhost:80/om',
+  // baseURL: process.env.VUE_APP_BASE_API + '/vue-element-admin', // url = base url + request url
   // http://localhost:80/om
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000 // request timeout
@@ -38,6 +38,8 @@ service.interceptors.request.use(
     //     config.data = qs.stringify(config.data)
     //   }
     // }
+    console.log('请求参数')
+    console.log(config)
     return config
   },
   error => {
@@ -62,6 +64,9 @@ service.interceptors.response.use(
   response => {
     const res = response.data
     // if the custom code is not 20000, it is judged as an error.
+    // 打印返回结果
+    console.log('请求结果:')
+    console.log(res)
     if (res.code !== 20000) {
       Message({
         message: res.message || 'Error',
