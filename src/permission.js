@@ -40,7 +40,9 @@ router.beforeEach(async(to, from, next) => {
           console.log(accessRoutes)
           // dynamically add accessible routes
           router.addRoutes(accessRoutes)
-
+          /* router.beforeEach((to, from, next) => {
+            router.addRoutes(accessRoutes)
+          }) */
           // hack method to ensure that addRoutes is complete
           // set the replace: true, so the navigation will not leave a history record
           next({ ...to, replace: true })

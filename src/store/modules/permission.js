@@ -1,6 +1,6 @@
 import { asyncRoutes, constantRoutes } from '@/router'
-import request from '@/utils/request'
-import Layout from '@/layout'
+// import request from '@/utils/request'
+// import Layout from '@/layout'
 
 /**
  * Use meta.role to determine if the current user has permission
@@ -64,47 +64,71 @@ const actions = {
   },
   index({ commit }, roles) {
     return new Promise(resolve => {
-      /* let accessedRoutes
+      let accessedRoutes
       if (roles.includes('admin')) {
         accessedRoutes = asyncRoutes || []
       } else {
         accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
-      }*/
-      let menuRouters
+      }
+      commit('SET_ROUTES', accessedRoutes)
+      resolve(accessedRoutes)
+      /* const menuRouters = []
+      const data = []
       request({
         url: '/menu/list',
         method: 'get',
         roles
       }).then(res => {
         const { data } = res
-        console.log(data)
         data.forEach((m, i) => {
-          if (m.parent != null) {
+          if (m.parent == -1) {
+            const url = '@/views/icons/index'
             m.path = '/' + m.url
+            console.log(url)
             const module = {
-              path: '/' + m.path,
+              path: '/' + m.url,
               component: Layout,
-              meta: { id: m.menuId, title: m.title, fullPath: '/' + m.path },
+              // meta: { id: m.menuId, title: m.menu_text, path: '/' + m.url },
               children: [
                 {
-                  path: '',
-                  component: () => import('@/views/' + m.path + '/index'),
+                  path: 'index',
+                  component: () => import('@/views/icons/index'),
                   meta: {
-                    menuHide: true,
-                    title: m.title
+                    name: 'icons',
+                    icon: m.icon,
+                    title: m.menuText
                   }
                 }
               ]
             }
             menuRouters.push(module)
           }
-          menuRouters
         })
-      })
-      // commit('SET_ROUTES', accessedRoutes)
-      // resolve(accessedRoutes)
-      commit('SET_ROUTES', menuRouters)
-      resolve(menuRouters)
+        // convertTree(menuRouters, data)
+        console.log(333)
+        console.log(menuRouters)
+        commit('SET_ROUTES', menuRouters)
+        resolve(menuRouters)
+      }) */
+
+      // 定义一个递归方法
+      /* function convertTree(routers, data) {
+        routers.forEach(r => {
+          data.forEach((m, i) => {
+            if (m.parent_id != -1 && m.parent_id === r.meta.id) {
+              if (!r.children) r.children = []
+              m.path = r.meta.fullPath + '/' + m.url
+              const menu = {
+                path: m.path,
+                component: () => import('@/views' + r.meta.path + '/' + m.url),
+                meta: { id: m.menuId, name:m.url,title: m.menu_text, fullPath: r.meta.path + '/' + m.url }
+              }
+              r.children.push(menu)
+            }
+          })
+          if (r.children) convertTree(r.children, data)
+        })
+      } */
     })
   }
 }
