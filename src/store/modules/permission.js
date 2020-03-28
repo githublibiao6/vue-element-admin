@@ -1,6 +1,6 @@
 import { asyncRoutes, constantRoutes } from '@/router'
-// import request from '@/utils/request'
-// import Layout from '@/layout'
+import request from '@/utils/request'
+import Layout from '@/layout'
 
 /**
  * Use meta.role to determine if the current user has permission
@@ -64,16 +64,17 @@ const actions = {
   },
   index({ commit }, roles) {
     return new Promise(resolve => {
-      let accessedRoutes
-      if (roles.includes('admin')) {
-        accessedRoutes = asyncRoutes || []
-      } else {
-        accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
-      }
-      commit('SET_ROUTES', accessedRoutes)
-      resolve(accessedRoutes)
-      /* const menuRouters = []
-      const data = []
+      // 原本的写死路径
+      // let accessedRoutes
+      // if (roles.includes('admin')) {
+      //   accessedRoutes = asyncRoutes || []
+      // } else {
+      //   accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
+      // }
+      // commit('SET_ROUTES', accessedRoutes)
+      // resolve(accessedRoutes)
+      // 后台请求的路径
+      const menuRouters = []
       request({
         url: '/menu/list',
         method: 'get',
@@ -81,7 +82,7 @@ const actions = {
       }).then(res => {
         const { data } = res
         data.forEach((m, i) => {
-          if (m.parent == -1) {
+          if (m.parent === '-1') {
             const url = '@/views/icons/index'
             m.path = '/' + m.url
             console.log(url)
@@ -92,7 +93,7 @@ const actions = {
               children: [
                 {
                   path: 'index',
-                  component: () => import('@/views/icons/index'),
+                  component: () => import('@/views/' + m.url + '/index'),
                   meta: {
                     name: 'icons',
                     icon: m.icon,
@@ -109,7 +110,7 @@ const actions = {
         console.log(menuRouters)
         commit('SET_ROUTES', menuRouters)
         resolve(menuRouters)
-      }) */
+      })
 
       // 定义一个递归方法
       /* function convertTree(routers, data) {
