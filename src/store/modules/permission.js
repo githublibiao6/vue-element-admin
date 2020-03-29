@@ -81,21 +81,26 @@ const actions = {
         roles
       }).then(res => {
         const { data } = res
+        const _import = require('@/router/_import_production')
         data.forEach((m, i) => {
           if (m.parent === '-1') {
-            const url = '@/views/icons/index'
-            m.path = '/' + m.url
-            console.log(url)
             const module = {
               path: '/' + m.url,
               component: Layout,
-              // meta: { id: m.menuId, title: m.menu_text, path: '/' + m.url },
+              name: m.menuText,
+              alwaysShow: true,
+              meta: {
+                title: m.menuText,
+                id: m.menuId,
+                icon: m.icon
+              },
               children: [
                 {
-                  path: 'index',
-                  component: () => import('@/views/' + m.url + '/index'),
+                  path: m.path,
+                  component: _import(m.url),
+                  name: 'icons',
                   meta: {
-                    name: 'icons',
+                    id: m.menuId,
                     icon: m.icon,
                     title: m.menuText
                   }
@@ -105,31 +110,49 @@ const actions = {
             menuRouters.push(module)
           }
         })
-        // convertTree(menuRouters, data)
-        console.log(333)
-        console.log(menuRouters)
+        convertTree(menuRouters, data)
         commit('SET_ROUTES', menuRouters)
         resolve(menuRouters)
       })
 
       // 定义一个递归方法
-      /* function convertTree(routers, data) {
+      function convertTree(routers, data) {
+        const _import = require('@/router/_import_production')
         routers.forEach(r => {
+          var flag = true
+          const child = r.children
+          r.children = []
           data.forEach((m, i) => {
-            if (m.parent_id != -1 && m.parent_id === r.meta.id) {
-              if (!r.children) r.children = []
-              m.path = r.meta.fullPath + '/' + m.url
+            if (m.parent !== '-1' && m.parent === r.meta.id) {
+              flag = false
+              if (!r.children) {
+                r.children = []
+              }
               const menu = {
                 path: m.path,
-                component: () => import('@/views' + r.meta.path + '/' + m.url),
-                meta: { id: m.menuId, name:m.url,title: m.menu_text, fullPath: r.meta.path + '/' + m.url }
+                name: m.menuText,
+                component: _import(m.url),
+                meta: {
+                  id: m.menuId,
+                  name: m.url,
+                  title: m.menuText,
+                  icon: m.icon
+                }
               }
               r.children.push(menu)
             }
           })
-          if (r.children) convertTree(r.children, data)
+          if (flag) {
+            r.children = child
+          }
+          // if(r.children){
+          // 	convertTree(r.children, data)
+          // } eles {
+          // 	r.alwaysShow = true
+          // }
+          // if (r.children)
         })
-      } */
+      }
     })
   }
 }
