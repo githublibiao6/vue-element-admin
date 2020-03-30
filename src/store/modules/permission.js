@@ -96,7 +96,7 @@ const actions = {
               },
               children: [
                 {
-                  path: m.path,
+                  path: m.url,
                   component: _import(m.url),
                   name: 'icons',
                   meta: {
@@ -111,6 +111,7 @@ const actions = {
           }
         })
         convertTree(menuRouters, data)
+        console.log(123333)
         commit('SET_ROUTES', menuRouters)
         resolve(menuRouters)
       })
@@ -129,7 +130,7 @@ const actions = {
                 r.children = []
               }
               const menu = {
-                path: m.path,
+                path: m.url,
                 name: m.menuText,
                 component: _import(m.url),
                 meta: {

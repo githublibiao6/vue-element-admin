@@ -1,9 +1,8 @@
 import request from '@/utils/request'
 
 export function fetchList(query) {
-  console.log(111)
   return request({
-    url: '/menu/list',
+    url: '/menu/page',
     method: 'get',
     params: query
   })

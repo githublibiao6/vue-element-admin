@@ -7,10 +7,10 @@ import { getToken } from '@/utils/auth'
 
 // create an axios instance
 const service = axios.create({
-  // baseURL: 'http://localhost:80/om',
+  baseURL: 'http://localhost:80/om',
   // baseURL: process.env.VUE_APP_BASE_API + '/vue-element-admin', // url = base url + request url
   // http://localhost:80/om//本机地址
-  baseURL: 'http://121.199.72.15:80/om', // 服务器地址
+  // baseURL: 'http://121.199.72.15:80/om', // 服务器地址
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000// request timeout
 })

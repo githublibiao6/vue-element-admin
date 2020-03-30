@@ -31,7 +31,7 @@ const systemRouter = {
       meta: { title: 'inlineEditTable' }
     },
     {
-      path: 'complex-table',
+      path: 'menu',
       component: () => import('@/views/system/menu'),
       name: 'ComplexTable',
       meta: { title: 'complexTable' }
