@@ -1,13 +1,13 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.title" :placeholder="$t('table.title')" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.importance" :placeholder="$t('table.importance')" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
+      <el-input v-model="listQuery.menuText" placeholder="菜单名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-select v-model="listQuery.menuType" :placeholder="菜单类型" clearable style="width: 90px" class="filter-item">
+        <el-option v-for="item in menuTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
       </el-select>
-      <el-select v-model="listQuery.type" :placeholder="$t('table.type')" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
+      <!-- <el-select v-model="listQuery.type" :placeholder="$t('table.type')" clearable class="filter-item" style="width: 130px">
+        <el-option v-for="item in menuTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
+      </el-select> -->
       <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
@@ -51,22 +51,22 @@
           <el-tag>{{ row.type | typeFilter }}</el-tag>
         </template>
       </el-table-column> -->
-      <el-table-column :label="$t('路径')" width="220px" align="center">
+      <el-table-column label="路径" width="220px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.url }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('菜单名称')" width="110px" align="center">
+      <el-table-column label="菜单名称" width="110px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.menuText }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('菜单类型')" width="110px" align="center">
+      <el-table-column label="菜单类型" width="110px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.menuType }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('图标')" width="110px" align="center">
+      <el-table-column label="图标" width="110px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.icon }}</span>
         </template>
@@ -99,12 +99,12 @@
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             {{ $t('table.edit') }}
           </el-button>
-          <el-button v-if="row.status!='published'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
+          <!-- <el-button v-if="row.status!='published'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
             {{ $t('table.publish') }}
           </el-button>
           <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
             {{ $t('table.draft') }}
-          </el-button>
+          </el-button> -->
           <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row,$index)">
             {{ $t('table.delete') }}
           </el-button>
@@ -116,27 +116,33 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="$t('table.type')" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
+        <el-form-item label="类型" prop="menuType">
+          <el-select v-model="temp.menuType" class="filter-item" placeholder="Please select">
+            <el-option v-for="item in menuTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('table.date')" prop="timestamp">
+        <!-- <el-form-item :label="$t('table.date')" prop="timestamp">
           <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
+        </el-form-item> -->
+        <el-form-item label="主键" prop="menuId">
+          <el-input v-model="temp.menuId" />
         </el-form-item>
-        <el-form-item :label="$t('table.title')" prop="title">
-          <el-input v-model="temp.title" />
+        <el-form-item label="路径" prop="url">
+          <el-input v-model="temp.url" />
         </el-form-item>
-        <el-form-item :label="$t('table.status')">
+        <el-form-item label="菜单名" prop="menuText">
+          <el-input v-model="temp.menuText" />
+        </el-form-item>
+        <!-- <el-form-item :label="$t('table.status')">
           <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
             <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
           </el-select>
         </el-form-item>
         <el-form-item :label="$t('table.importance')">
           <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;" />
-        </el-form-item>
-        <el-form-item :label="$t('table.remark')">
-          <el-input v-model="temp.remark" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
+        </el-form-item> -->
+        <el-form-item label="描述">
+          <el-input v-model="temp.notes" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -167,15 +173,15 @@ import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
-const calendarTypeOptions = [
-  { key: 'CN', display_name: 'China' },
-  { key: 'US', display_name: 'USA' },
-  { key: 'JP', display_name: 'Japan' },
-  { key: 'EU', display_name: 'Eurozone' }
+const menuTypeOptions = [
+  { key: '1', display_name: '菜单' },
+  { key: '2', display_name: '按钮' },
+  { key: '3', display_name: '其他' },
+  { key: '4', display_name: '呵呵' }
 ]
 
 // arr to obj, such as { CN : "China", US : "USA" }
-const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
+const calendarTypeKeyValue = menuTypeOptions.reduce((acc, cur) => {
   acc[cur.key] = cur.display_name
   return acc
 }, {})
@@ -212,7 +218,7 @@ export default {
         sort: '+id'
       },
       importanceOptions: [1, 2, 3],
-      calendarTypeOptions,
+      menuTypeOptions,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
