@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="listQuery.menuText" placeholder="菜单名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.menuType" :placeholder="菜单类型" clearable style="width: 90px" class="filter-item">
+      <el-select v-model="listQuery.menuType" placeholder="菜单类型" clearable style="width: 90px" class="filter-item">
         <el-option v-for="item in menuTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
       </el-select>
       <!-- <el-select v-model="listQuery.type" :placeholder="$t('table.type')" clearable class="filter-item" style="width: 130px">
@@ -35,7 +35,7 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column :label="$t('主键')" prop="id" sortable="custom" align="center" width="180" :class-name="getSortClass('id')">
+      <el-table-column label="$t('主键')" prop="id" sortable="custom" align="center" width="180" :class-name="getSortClass('id')">
         <template slot-scope="{row}">
           <span>{{ row.menuId }}</span>
         </template>
@@ -168,7 +168,7 @@
 </template>
 
 <script>
-import { fetchList, fetchPv, createMenu, updateMenu } from '@/api/menu'
+import { fetchList, fetchPv, createMenu, updateMenu, deleteMenu } from '@/api/menu'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -353,13 +353,15 @@ export default {
       })
     },
     handleDelete(row, index) {
-      this.$notify({
-        title: '成功',
-        message: '删除成功',
-        type: 'success',
-        duration: 2000
+      deleteMenu({ pk: row.menuId }).then(() => {
+        this.$notify({
+          title: '成功',
+          message: '删除成功',
+          type: 'success',
+          duration: 2000
+        })
+        this.list.splice(index, 1)
       })
-      this.list.splice(index, 1)
     },
     handleFetchPv(pv) {
       fetchPv(pv).then(response => {

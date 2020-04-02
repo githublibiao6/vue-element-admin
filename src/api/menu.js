@@ -39,3 +39,11 @@ export function updateMenu(data) {
     data
   })
 }
+
+export function deleteMenu(data) {
+  return request({
+    url: '/menu/delete',
+    method: 'post',
+    data
+  })
+}
