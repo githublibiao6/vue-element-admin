@@ -20,9 +20,9 @@
       <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
         {{ $t('table.export') }}
       </el-button>
-      <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
-        {{ $t('table.reviewer') }}
-      </el-checkbox>
+      <!-- <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
+        {{ $t('描述') }}
+      </el-checkbox> -->
     </div>
 
     <el-table
@@ -35,7 +35,7 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="$t('主键')" prop="id" sortable="custom" align="center" width="180" :class-name="getSortClass('id')">
+      <el-table-column label="主键" prop="id" align="center" width="220px" :class-name="getSortClass('id')">
         <template slot-scope="{row}">
           <span>{{ row.menuId }}</span>
         </template>
@@ -51,12 +51,12 @@
           <el-tag>{{ row.type | typeFilter }}</el-tag>
         </template>
       </el-table-column> -->
-      <el-table-column label="路径" width="220px" align="center">
+      <el-table-column label="路径" align="center">
         <template slot-scope="{row}">
           <span>{{ row.url }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="菜单名称" width="110px" align="center">
+      <el-table-column label="菜单名称" align="center">
         <template slot-scope="{row}">
           <span>{{ row.menuText }}</span>
         </template>
@@ -66,7 +66,7 @@
           <span>{{ row.menuType }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="图标" width="110px" align="center">
+      <el-table-column label="图标" width="140px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.icon }}</span>
         </template>
@@ -94,7 +94,7 @@
           </el-tag>
         </template>
       </el-table-column> -->
-      <el-table-column :label="$t('table.actions')" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" width="240px" align="center" class-name="small-padding fixed-width">
         <template slot-scope="{row,$index}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             {{ $t('table.edit') }}
