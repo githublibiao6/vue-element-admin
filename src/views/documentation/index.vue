@@ -1,7 +1,8 @@
 <template>
   <div class="app-container documentation-container">
-    <a class="document-btn" target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/">Documentation</a>
+    <a class="document-btn" target="_blank" @click="handleFilter">系统文档</a>
     <a class="document-btn" target="_blank" href="https://github.com/PanJiaChen/vue-element-admin/">Github Repository</a>
+    <a class="document-btn" target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/">Documentation</a>
     <a class="document-btn" target="_blank" href="https://panjiachen.gitee.io/vue-element-admin-site/zh/">国内文档</a>
     <dropdown-menu class="document-btn" :items="articleList" title="系列文章" />
     <a class="document-btn" target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/zh/job/">内推招聘</a>
@@ -10,6 +11,7 @@
 
 <script>
 import DropdownMenu from '@/components/Share/DropdownMenu'
+import request from '@/utils/request'
 
 export default {
   name: 'Documentation',
@@ -27,6 +29,17 @@ export default {
         { title: 'webpack4（上）', href: 'https://juejin.im/post/59bb864b5188257e7a427c09' },
         { title: 'webpack4（下）', href: 'https://juejin.im/post/5b5d6d6f6fb9a04fea58aabc' }
       ]
+    }
+  },
+  methods: {
+    handleFilter() {
+      request({
+        url: '/document/index',
+        method: 'get'
+      }).then(res => {
+        const { data } = res
+        window.open(data, '_blank')
+      })
     }
   }
 }
