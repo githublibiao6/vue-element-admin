@@ -43,7 +43,7 @@ export function updateMenu(data) {
 export function deleteMenu(data) {
   return request({
     url: '/menu/delete',
-    method: 'post',
+    method: 'delete',
     data
   })
 }

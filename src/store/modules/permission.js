@@ -111,7 +111,6 @@ const actions = {
           }
         })
         convertTree(menuRouters, data)
-        console.log(123333)
         commit('SET_ROUTES', menuRouters)
         resolve(menuRouters)
       })
