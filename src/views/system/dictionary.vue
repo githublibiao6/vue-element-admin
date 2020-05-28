@@ -1,99 +1,101 @@
 <template>
   <div class="app-container">
-    <div class="filter-container">
-      <el-input v-model="listQuery.menuText" placeholder="菜单名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.menuType" placeholder="菜单类型" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in menuTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-      </el-select>
-      <!-- <el-select v-model="listQuery.type" :placeholder="$t('table.type')" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in menuTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select> -->
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select>
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-        {{ $t('table.search') }}
-      </el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
-        {{ $t('table.add') }}
-      </el-button>
-      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-        {{ $t('table.export') }}
-      </el-button>
-      <!-- <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
-        {{ $t('描述') }}
-      </el-checkbox> -->
-    </div>
-    <!-- default-expand-all -->
-    <el-table
-      :key="tableKey"
-      v-loading="listLoading"
-      :data="list"
-      row-key="menuId"
-      border
-      fit
-      lazy
-      highlight-current-row
-      :load="load"
-      style="width: 100%;"
-      :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
-      @sort-change="sortChange"
-    >
-      <el-table-column label="主键" prop="id" align="center" width="220px" :class-name="getSortClass('id')">
-        <template slot-scope="{row}">
-          <span>{{ row.menuId }}</span>
-        </template>
-      </el-table-column>
-      <!-- <el-table-column :label="$t('table.date')" width="150px" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
-        </template>
-      </el-table-column> -->
-      <!-- <el-table-column :label="$t('table.title')" min-width="150px">
-        <template slot-scope="{row}">
-          <span class="link-type" @click="handleUpdate(row)">{{ row.title }}</span>
-          <el-tag>{{ row.type | typeFilter }}</el-tag>
-        </template>
-      </el-table-column> -->
-      <el-table-column label="路径" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.url }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="菜单名称" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.menuText }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="菜单类型" width="110px" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.menuType }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="图标" width="140px" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.icon }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column v-if="showReviewer" :label="$t('table.reviewer')" width="110px" align="center">
-        <template slot-scope="{row}">
-          <span style="color:red;">{{ row.reviewer }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="240px" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="{row,$index}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">
-            {{ $t('table.edit') }}
-          </el-button>
-          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row,$index)">
-            {{ $t('table.delete') }}
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <el-row :gutter="10">
+      <el-col :span="6">
+        <el-input
+          v-model="filterText"
+          placeholder="输入关键字进行过滤"
+        />
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+        <el-tree
+          ref="tree"
+          class="filter-tree"
+          :data="treeData"
+          :props="defaultProps"
+          default-expand-all
+          :filter-node-method="filterNode"
+        />
+      </el-col>
+      <el-col :span="18">
+        <div class="filter-container">
+          <el-input v-model="listQuery.menuText" placeholder="菜单名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+          <el-select v-model="listQuery.menuType" placeholder="菜单类型" clearable style="width: 90px" class="filter-item">
+            <el-option v-for="item in menuTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
+          </el-select>
+          <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
+            <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
+          </el-select>
+          <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
+            {{ $t('table.search') }}
+          </el-button>
+          <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
+            {{ $t('table.add') }}
+          </el-button>
+          <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
+            {{ $t('table.export') }}
+          </el-button>
+        </div>
+        <!-- default-expand-all -->
+        <el-table
+          :key="tableKey"
+          v-loading="listLoading"
+          :data="list"
+          row-key="menuId"
+          border
+          fit
+          lazy
+          highlight-current-row
+          :load="load"
+          style="width: 100%;"
+          :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
+          @sort-change="sortChange"
+        >
+          <el-table-column label="主键" prop="id" align="center" width="220px" :class-name="getSortClass('id')">
+            <template slot-scope="{row}">
+              <span>{{ row.menuId }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="路径1" align="center">
+            <template slot-scope="{row}">
+              <span>{{ row.url }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="菜单名称" align="center">
+            <template slot-scope="{row}">
+              <span>{{ row.menuText }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="菜单类型" width="110px" align="center">
+            <template slot-scope="{row}">
+              <span>{{ row.menuType }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="图标" width="140px" align="center">
+            <template slot-scope="{row}">
+              <span>{{ row.icon }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column v-if="showReviewer" :label="$t('table.reviewer')" width="110px" align="center">
+            <template slot-scope="{row}">
+              <span style="color:red;">{{ row.reviewer }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="240px" align="center" class-name="small-padding fixed-width">
+            <template slot-scope="{row,$index}">
+              <el-button type="primary" size="mini" @click="handleUpdate(row)">
+                {{ $t('table.edit') }}
+              </el-button>
+              <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row,$index)">
+                {{ $t('table.delete') }}
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
 
+        <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+      </el-col>
+    </el-row>
+    <!-- 弹出框  -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
         <el-form-item label="类型" prop="menuType">
@@ -137,7 +139,7 @@
 </template>
 
 <script>
-import { fetchList, fetchPv, createMenu, updateMenu, deleteMenu } from '@/api/menu'
+import { fetchList, fetchPv, createMenu, updateMenu, deleteMenu } from '@/api/system/dictionary'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -173,12 +175,48 @@ export default {
   },
   data() {
     return {
-      list: [{
+      filterText: '',
+      treeData: [{
         id: 1,
-        date: '2016-05-02',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
+        label: '一级 1',
+        children: [{
+          id: 4,
+          label: '二级 1-1',
+          children: [{
+            id: 9,
+            label: '三级 1-1-1'
+          }, {
+            id: 10,
+            label: '三级 1-1-2'
+          }]
+        }]
+      }, {
+        id: 2,
+        label: '一级 2',
+        children: [{
+          id: 5,
+          label: '二级 2-1'
+        }, {
+          id: 6,
+          label: '二级 2-2'
+        }]
+      }, {
+        id: 3,
+        label: '一级 3',
+        children: [{
+          id: 7,
+          label: '二级 3-1'
+        }, {
+          id: 8,
+          label: '二级 3-2'
+        }]
       }],
+      defaultProps: {
+        children: 'children',
+        label: 'label'
+      },
+      // 上面是树形
+      list: null,
       tableKey: 0,
       total: 0,
       listLoading: true,
@@ -227,6 +265,11 @@ export default {
     load(tree, treeNode, resolve) {
       // resolve([])
       resolve(tree.children)
+    },
+    filterNode(value, data) {
+      console.log(123)
+      if (!value) return true
+      return data.label.indexOf(value) !== -1
     },
     getList() {
       this.listLoading = true
