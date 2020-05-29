@@ -258,6 +258,11 @@ export default {
       downloadLoading: false
     }
   },
+  watch: {
+    filterText(val) {
+      this.$refs.tree.filter(val)
+    }
+  },
   created() {
     this.getList()
   },
@@ -267,7 +272,6 @@ export default {
       resolve(tree.children)
     },
     filterNode(value, data) {
-      console.log(123)
       if (!value) return true
       return data.label.indexOf(value) !== -1
     },
