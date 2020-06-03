@@ -10,29 +10,44 @@
         <el-tree
           ref="tree"
           class="filter-tree"
-          :data="treeData"
+          :data="treeList"
           :props="defaultProps"
+          highlight-current
           default-expand-all
           :filter-node-method="filterNode"
-        />
+          @node-click="nodeClick"
+        >
+          <span slot-scope="{ node, data }" class="custom-tree-node">
+            <span>{{ node.label }}</span>
+            <span>
+              <el-button
+                type="text"
+                size="mini"
+                @click="() => edit(node, data)"
+              >
+                编辑
+              </el-button>
+              <el-button
+                type="text"
+                size="mini"
+                @click="() => remove(node, data)"
+              >
+                删除
+              </el-button>
+            </span>
+          </span>
+        </el-tree>
       </el-col>
       <el-col :span="18">
         <div class="filter-container">
-          <el-input v-model="listQuery.menuText" placeholder="菜单名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-          <el-select v-model="listQuery.menuType" placeholder="菜单类型" clearable style="width: 90px" class="filter-item">
-            <el-option v-for="item in menuTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-          </el-select>
-          <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-            <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-          </el-select>
-          <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-            {{ $t('table.search') }}
+          <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">
+            新增字典
           </el-button>
-          <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
-            {{ $t('table.add') }}
-          </el-button>
-          <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-            {{ $t('table.export') }}
+          <!-- <el-button class="filter-item" style="margin-left: 10px;" type="warning" icon="el-icon-edit" @click="handleUpdate">
+            编辑字典
+          </el-button> -->
+          <el-button v-waves :loading="downloadLoading" class="filter-item" type="success" icon="el-icon-circle-plus-outline" @click="teamCreate">
+            新增字典项
           </el-button>
         </div>
         <!-- default-expand-all -->
@@ -42,6 +57,7 @@
           :data="list"
           row-key="menuId"
           border
+          stripe
           fit
           lazy
           highlight-current-row
@@ -50,29 +66,30 @@
           :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
           @sort-change="sortChange"
         >
-          <el-table-column label="主键" prop="id" align="center" width="220px" :class-name="getSortClass('id')">
+          <el-table-column type="index" width="90" label="序号" />
+          <el-table-column label="字典项" prop="id" align="center" width="220px" :class-name="getSortClass('id')">
             <template slot-scope="{row}">
               <span>{{ row.menuId }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="路径1" align="center">
+          <el-table-column label="字典值" align="center">
             <template slot-scope="{row}">
               <span>{{ row.url }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="菜单名称" align="center">
+          <el-table-column label="描述" align="center">
             <template slot-scope="{row}">
               <span>{{ row.menuText }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="菜单类型" width="110px" align="center">
-            <template slot-scope="{row}">
-              <span>{{ row.menuType }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="图标" width="140px" align="center">
+          <el-table-column label="显示顺序" width="140px" align="center">
             <template slot-scope="{row}">
               <span>{{ row.icon }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="修改时间" width="180px" align="center">
+            <template slot-scope="{row}">
+              <span>{{ row.menuType }}</span>
             </template>
           </el-table-column>
           <el-table-column v-if="showReviewer" :label="$t('table.reviewer')" width="110px" align="center">
@@ -82,11 +99,11 @@
           </el-table-column>
           <el-table-column label="操作" width="240px" align="center" class-name="small-padding fixed-width">
             <template slot-scope="{row,$index}">
-              <el-button type="primary" size="mini" @click="handleUpdate(row)">
-                {{ $t('table.edit') }}
+              <el-button type="primary" size="mini" @click="handleTeamUpdate(row)">
+                编辑
               </el-button>
               <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row,$index)">
-                {{ $t('table.delete') }}
+                删除
               </el-button>
             </template>
           </el-table-column>
@@ -98,30 +115,50 @@
     <!-- 弹出框  -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="类型" prop="menuType">
-          <el-select v-model="temp.menuType" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in menuTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-          </el-select>
+        <el-form-item label="字典编码" prop="code">
+          <el-input v-model="temp.code" />
         </el-form-item>
-        <el-form-item label="主键" prop="menuId">
-          <el-input v-model="temp.menuId" />
+        <el-form-item label="字典名称" prop="name">
+          <el-input v-model="temp.name" />
         </el-form-item>
-        <el-form-item label="路径" prop="url">
-          <el-input v-model="temp.url" />
+        <el-form-item label="字典描述">
+          <el-input v-model="temp.comments" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="菜单名" prop="menuText">
-          <el-input v-model="temp.menuText" />
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
+          确定
+        </el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog :title="textMap[dialogTeamStatus]" :visible.sync="dialogTeamVisible">
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="所属字典" prop="name">
+          <el-input v-model="temp.name" />
+        </el-form-item>
+        <el-form-item label="字典项" prop="dic_value">
+          <el-input v-model="temp.dic_value" />
+        </el-form-item>
+        <el-form-item label="字典值" prop="dic_text">
+          <el-input v-model="temp.dic_text" />
+        </el-form-item>
+        <el-form-item label="排序" prop="sort">
+          <el-input v-model="temp.sort" />
         </el-form-item>
         <el-form-item label="描述">
           <el-input v-model="temp.notes" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">
-          {{ $t('table.cancel') }}
+        <el-button @click="dialogTeamVisible = false">
+          取消
         </el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
-          {{ $t('table.confirm') }}
+        <el-button type="primary" @click="dialogTeamStatus==='create'?createData():updateData()">
+          确定
         </el-button>
       </div>
     </el-dialog>
@@ -139,7 +176,7 @@
 </template>
 
 <script>
-import { fetchList, fetchPv, createMenu, updateMenu, deleteMenu } from '@/api/system/dictionary'
+import { fetchList, fetchDicList, fetchPv, createDictionary, updateMenu, deleteMenu } from '@/api/system/dictionary'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -176,47 +213,14 @@ export default {
   data() {
     return {
       filterText: '',
-      treeData: [{
-        id: 1,
-        label: '一级 1',
-        children: [{
-          id: 4,
-          label: '二级 1-1',
-          children: [{
-            id: 9,
-            label: '三级 1-1-1'
-          }, {
-            id: 10,
-            label: '三级 1-1-2'
-          }]
-        }]
-      }, {
-        id: 2,
-        label: '一级 2',
-        children: [{
-          id: 5,
-          label: '二级 2-1'
-        }, {
-          id: 6,
-          label: '二级 2-2'
-        }]
-      }, {
-        id: 3,
-        label: '一级 3',
-        children: [{
-          id: 7,
-          label: '二级 3-1'
-        }, {
-          id: 8,
-          label: '二级 3-2'
-        }]
-      }],
       defaultProps: {
         children: 'children',
         label: 'label'
       },
       // 上面是树形
+      dic_id: null,
       list: null,
+      treeList: null,
       tableKey: 0,
       total: 0,
       listLoading: true,
@@ -243,10 +247,12 @@ export default {
         status: 'published'
       },
       dialogFormVisible: false,
+      dialogTeamVisible: false,
       dialogStatus: '',
+      dialogTeamStatus: '',
       textMap: {
-        update: 'Edit',
-        create: 'Create'
+        update: '编辑',
+        create: '新增'
       },
       dialogPvVisible: false,
       pvData: [],
@@ -264,7 +270,9 @@ export default {
     }
   },
   created() {
+    console.log(' 页面初始？ ')
     this.getList()
+    this.getTreeList()
   },
   methods: {
     load(tree, treeNode, resolve) {
@@ -275,15 +283,32 @@ export default {
       if (!value) return true
       return data.label.indexOf(value) !== -1
     },
+    nodeClick(data, node, e) {
+      if (node.level !== 1) {
+        this.dic_id = data.id
+        this.listQuery.dic_id = this.dic_id
+        this.getList()
+      } else {
+        this.dic_id = null
+      }
+    },
     getList() {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
-        this.list = response.data.items
-        this.total = response.data.total
+      fetchDicList(this.listQuery).then(response => {
+        if (response.data != null) {
+          this.list = response.data.items
+          this.total = response.data.total
+        }
+        this.listLoading = false
         // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
+        // setTimeout(() => {
+        //   this.listLoading = false
+        // }, 1.5 * 1000)
+      })
+    },
+    getTreeList() {
+      fetchList().then(response => {
+        this.treeList = response.data
       })
     },
     handleFilter() {
@@ -322,6 +347,9 @@ export default {
         type: ''
       }
     },
+    showMsg() {
+      this.$message('请选择一个字典')
+    },
     handleCreate() {
       this.resetTemp()
       this.dialogStatus = 'create'
@@ -330,12 +358,32 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
+    handleUpdate() {
+      this.resetTemp()
+      this.dialogStatus = 'update'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    teamCreate() {
+      if (this.dic_id == null) {
+        this.showMsg()
+      } else {
+        this.resetTemp()
+        this.dialogStatus = 'update'
+        this.dialogTeamVisible = true
+        this.$nextTick(() => {
+          this.$refs['dataForm'].clearValidate()
+        })
+      }
+    },
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
           this.temp.author = 'vue-element-admin'
-          createMenu(this.temp).then(() => {
+          createDictionary(this.temp).then(() => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
             this.$notify({
@@ -348,7 +396,7 @@ export default {
         }
       })
     },
-    handleUpdate(row) {
+    handleTeamUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
       this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
@@ -449,3 +497,13 @@ export default {
   }
 }
 </script>
+<style>
+  .custom-tree-node {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    padding-right: 25px;
+  }
+</style>
