@@ -383,14 +383,23 @@ export default {
         if (valid) {
           this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
           this.temp.author = 'vue-element-admin'
-          createDictionary(this.temp).then(() => {
-            this.list.unshift(this.temp)
+          createDictionary(this.temp).then((res) => {
+            // this.list.unshift(this.temp)
             this.dialogFormVisible = false
+            var type = 'success'
+            var msg = '操作成功'
+            if (!res.success) {
+              type = 'error'
+              msg = '操作失败'
+            } else {
+              this.getTreeList()
+            }
             this.$notify({
-              title: '成功',
-              message: '创建成功',
-              type: 'success',
-              duration: 2000
+              title: msg,
+              message: res.message,
+              type: type,
+              duration: 2000,
+              showClose: false
             })
           })
         }

@@ -2,15 +2,7 @@ import request from '@/utils/request'
 
 export function fetchList(query) {
   return request({
-    url: '/dictionary/list',
-    method: 'get',
-    params: query
-  })
-}
-
-export function fetchDicList(query) {
-  return request({
-    url: '/dictionaryteams/page',
+    url: '/dictionary/page',
     method: 'get',
     params: query
   })
@@ -32,9 +24,9 @@ export function fetchPv(pv) {
   })
 }
 
-export function createDictionary(data) {
+export function createMenu(data) {
   return request({
-    url: '/dictionary/add',
+    url: '/menu/create',
     method: 'post',
     data
   })

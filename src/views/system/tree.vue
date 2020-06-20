@@ -24,15 +24,19 @@
         {{ $t('描述') }}
       </el-checkbox> -->
     </div>
-
+    <!-- default-expand-all -->
     <el-table
       :key="tableKey"
       v-loading="listLoading"
       :data="list"
+      row-key="menuId"
       border
       fit
+      lazy
       highlight-current-row
+      :load="load"
       style="width: 100%;"
+      :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
       @sort-change="sortChange"
     >
       <el-table-column label="主键" prop="id" align="center" width="220px" :class-name="getSortClass('id')">
@@ -76,35 +80,11 @@
           <span style="color:red;">{{ row.reviewer }}</span>
         </template>
       </el-table-column>
-      <!-- <el-table-column :label="$t('table.importance')" width="80px">
-        <template slot-scope="{row}">
-          <svg-icon v-for="n in +row.importance" :key="n" icon-class="star" class="meta-item__icon" />
-        </template>
-      </el-table-column> -->
-      <!-- <el-table-column :label="$t('table.readings')" align="center" width="95">
-        <template slot-scope="{row}">
-          <span v-if="row.pageviews" class="link-type" @click="handleFetchPv(row.pageviews)">{{ row.pageviews }}</span>
-          <span v-else>0</span>
-        </template>
-      </el-table-column> -->
-      <!-- <el-table-column :label="$t('table.status')" class-name="status-col" width="100">
-        <template slot-scope="{row}">
-          <el-tag :type="row.status | statusFilter">
-            {{ row.status }}
-          </el-tag>
-        </template>
-      </el-table-column> -->
       <el-table-column label="操作" width="240px" align="center" class-name="small-padding fixed-width">
         <template slot-scope="{row,$index}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             {{ $t('table.edit') }}
           </el-button>
-          <!-- <el-button v-if="row.status!='published'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
-            {{ $t('table.publish') }}
-          </el-button>
-          <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
-            {{ $t('table.draft') }}
-          </el-button> -->
           <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row,$index)">
             {{ $t('table.delete') }}
           </el-button>
@@ -121,9 +101,6 @@
             <el-option v-for="item in menuTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
           </el-select>
         </el-form-item>
-        <!-- <el-form-item :label="$t('table.date')" prop="timestamp">
-          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
-        </el-form-item> -->
         <el-form-item label="主键" prop="menuId">
           <el-input v-model="temp.menuId" />
         </el-form-item>
@@ -133,14 +110,6 @@
         <el-form-item label="菜单名" prop="menuText">
           <el-input v-model="temp.menuText" />
         </el-form-item>
-        <!-- <el-form-item :label="$t('table.status')">
-          <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
-          </el-select>
-        </el-form-item>
-        <el-form-item :label="$t('table.importance')">
-          <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;" />
-        </el-form-item> -->
         <el-form-item label="描述">
           <el-input v-model="temp.notes" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
         </el-form-item>
@@ -176,8 +145,7 @@ import Pagination from '@/components/Pagination' // secondary package based on e
 const menuTypeOptions = [
   { key: '1', display_name: '菜单' },
   { key: '2', display_name: '按钮' },
-  { key: '3', display_name: '其他' },
-  { key: '4', display_name: '呵呵' }
+  { key: '3', display_name: '其他' }
 ]
 
 // arr to obj, such as { CN : "China", US : "USA" }
@@ -205,8 +173,13 @@ export default {
   },
   data() {
     return {
+      list: [{
+        id: 1,
+        date: '2016-05-02',
+        name: '王小虎',
+        address: '上海市普陀区金沙江路 1518 弄'
+      }],
       tableKey: 0,
-      list: null,
       total: 0,
       listLoading: true,
       listQuery: {
@@ -251,6 +224,10 @@ export default {
     this.getList()
   },
   methods: {
+    load(tree, treeNode, resolve) {
+      // resolve([])
+      resolve(tree.children)
+    },
     getList() {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
@@ -340,35 +317,54 @@ export default {
           tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
           updateMenu(tempData).then((res) => {
             const index = this.list.findIndex(v => v.id === this.temp.id)
+            console.log(res)
             this.list.splice(index, 1, this.temp)
             this.dialogFormVisible = false
-            var type = 'success'
-            var msg = '操作成功'
-            if (!res.success) {
-              type = 'error'
-              msg = '操作失败'
+            if (res.success) {
+              this.$notify({
+                title: '成功',
+                message: res.message,
+                type: 'success',
+                duration: 2000
+              })
+            } else {
+              this.$notify({
+                title: '失败',
+                message: res.message,
+                type: 'error',
+                duration: 2000
+              })
             }
-            this.$notify({
-              title: msg,
-              message: res.message,
-              type: type,
-              duration: 2000,
-              showClose: false
-            })
           })
         }
       })
     },
     handleDelete(row, index) {
-      deleteMenu({ pk: row.menuId }).then(() => {
-        this.$notify({
-          title: '成功',
-          message: '删除成功',
-          type: 'success',
-          duration: 2000
+      // eslint-disable-next-line no-undef
+      this.$confirm('确认删除？', '提示', {
+        distinguishCancelAndClose: true, /* 是否区分取消和关闭 */
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async() => { // 这里加个 async，可以查下相关文档 async...await
+        deleteMenu({ pk: row.menuId }).then(() => {
+          this.$notify({
+            title: '成功',
+            message: '删除成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.list.splice(index, 1)
         })
-        this.list.splice(index, 1)
+      }).catch(action => {
+        this.$message({
+          type: 'info',
+          message: action === 'cancel'
+            ? '取消删除'
+            : '取消操作'
+        })
       })
+      /**/
     },
     handleFetchPv(pv) {
       fetchPv(pv).then(response => {
