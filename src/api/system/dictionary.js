@@ -40,17 +40,25 @@ export function createDictionary(data) {
   })
 }
 
-export function updateMenu(data) {
+export function updateDictionary(data) {
   return request({
-    url: '/menu/update',
+    url: '/dictionary/update',
     method: 'post',
     data
   })
 }
 
-export function deleteMenu(data) {
+export function removeDictionary(data) {
   return request({
-    url: '/menu/delete',
+    url: '/dictionary/remove',
+    method: 'delete',
+    data
+  })
+}
+
+export function removeTeam(data) {
+  return request({
+    url: '/dictionaryteams/delete',
     method: 'delete',
     data
   })

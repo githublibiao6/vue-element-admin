@@ -129,14 +129,14 @@
         <el-button @click="dialogFormVisible = false">
           取消
         </el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
+        <el-button type="primary" @click="dialogStatus==='create'?createData():updateDictionary()">
           确定
         </el-button>
       </div>
     </el-dialog>
 
     <el-dialog :title="textMap[dialogTeamStatus]" :visible.sync="dialogTeamVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
+      <el-form ref="teamForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
         <el-form-item label="所属字典" prop="name">
           <el-input v-model="temp.name" />
         </el-form-item>
@@ -176,7 +176,7 @@
 </template>
 
 <script>
-import { fetchList, fetchDicList, fetchPv, createDictionary, updateMenu, deleteMenu } from '@/api/system/dictionary'
+import { fetchList, fetchDicList, fetchPv, createDictionary, updateDictionary, removeDictionary, removeTeam } from '@/api/system/dictionary'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -239,7 +239,6 @@ export default {
       showReviewer: false,
       temp: {
         id: undefined,
-        importance: 1,
         remark: '',
         timestamp: new Date(),
         title: '',
@@ -269,8 +268,8 @@ export default {
       this.$refs.tree.filter(val)
     }
   },
+  // 页面初始化
   created() {
-    console.log(' 页面初始？ ')
     this.getList()
     this.getTreeList()
   },
@@ -291,6 +290,46 @@ export default {
       } else {
         this.dic_id = null
       }
+    },
+    edit(node, data) {
+      // this.temp = Object.assign({}, data) // copy obj
+      this.temp = Object.assign({}, data)
+      this.temp.timestamp = new Date(this.temp.timestamp)
+      this.dialogStatus = 'update'
+      this.dialogFormVisible = true
+      console.log(this.temp)
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    remove(node, data) {
+      this.$confirm('确认删除字典？', '提示', {
+        /* 是否区分取消和关闭 */
+        distinguishCancelAndClose: true,
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async() => {
+        removeDictionary(data).then((res) => {
+          // this.list.unshift(this.temp)
+          // this.dialogFormVisible = false
+          var type = 'success'
+          var msg = '操作成功'
+          if (!res.success) {
+            type = 'error'
+            msg = '操作失败'
+          } else {
+            this.getTreeList()
+          }
+          this.$notify({
+            title: msg,
+            message: res.message,
+            type: type,
+            duration: 2000,
+            showClose: false
+          })
+        })
+      })
     },
     getList() {
       this.listLoading = true
@@ -414,15 +453,12 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    updateData() {
+    updateDictionary() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateMenu(tempData).then((res) => {
-            const index = this.list.findIndex(v => v.id === this.temp.id)
-            console.log(res)
-            this.list.splice(index, 1, this.temp)
+          updateDictionary(tempData).then((res) => {
             this.dialogFormVisible = false
             if (res.success) {
               this.$notify({
@@ -431,6 +467,7 @@ export default {
                 type: 'success',
                 duration: 2000
               })
+              this.getTreeList()
             } else {
               this.$notify({
                 title: '失败',
@@ -451,7 +488,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async() => { // 这里加个 async，可以查下相关文档 async...await
-        deleteMenu({ pk: row.menuId }).then(() => {
+        removeTeam({ pk: row.menuId }).then(() => {
           this.$notify({
             title: '成功',
             message: '删除成功',
