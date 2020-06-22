@@ -43,9 +43,6 @@
           <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-plus" @click="handleCreate">
             新增字典
           </el-button>
-          <!-- <el-button class="filter-item" style="margin-left: 10px;" type="warning" icon="el-icon-edit" @click="handleUpdate">
-            编辑字典
-          </el-button> -->
           <el-button v-waves :loading="downloadLoading" class="filter-item" type="success" icon="el-icon-circle-plus-outline" @click="teamCreate">
             新增字典项
           </el-button>
@@ -141,23 +138,23 @@
           <el-input v-model="temp.name" />
         </el-form-item>
         <el-form-item label="字典项" prop="dic_value">
-          <el-input v-model="temp.dic_value" />
+          <el-input v-model="teamTemp.dic_value" />
         </el-form-item>
         <el-form-item label="字典值" prop="dic_text">
-          <el-input v-model="temp.dic_text" />
+          <el-input v-model="teamTemp.dic_text" />
         </el-form-item>
         <el-form-item label="排序" prop="sort">
-          <el-input v-model="temp.sort" />
+          <el-input v-model="teamTemp.sort" />
         </el-form-item>
         <el-form-item label="描述">
-          <el-input v-model="temp.notes" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
+          <el-input v-model="teamTemp.notes" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogTeamVisible = false">
           取消
         </el-button>
-        <el-button type="primary" @click="dialogTeamStatus==='create'?createData():updateData()">
+        <el-button type="primary" @click="dialogTeamStatus==='create'?createTeam():updateData()">
           确定
         </el-button>
       </div>
@@ -176,7 +173,7 @@
 </template>
 
 <script>
-import { fetchList, fetchDicList, fetchPv, createDictionary, updateDictionary, removeDictionary, removeTeam } from '@/api/system/dictionary'
+import { fetchList, fetchDicList, createDictionary, createTeam, updateDictionary, updateTeam, removeDictionary, removeTeam } from '@/api/system/dictionary'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -242,8 +239,10 @@ export default {
         remark: '',
         timestamp: new Date(),
         title: '',
-        type: '',
-        status: 'published'
+        type: ''
+      },
+      teamTemp: {
+        id: undefined
       },
       dialogFormVisible: false,
       dialogTeamVisible: false,
@@ -286,11 +285,13 @@ export default {
       if (node.level !== 1) {
         this.dic_id = data.id
         this.listQuery.dic_id = this.dic_id
+        this.temp.name = data.label
         this.getList()
       } else {
         this.dic_id = null
       }
     },
+    // 字典编辑
     edit(node, data) {
       // this.temp = Object.assign({}, data) // copy obj
       this.temp = Object.assign({}, data)
@@ -302,6 +303,7 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
+    // 字典删除
     remove(node, data) {
       this.$confirm('确认删除字典？', '提示', {
         /* 是否区分取消和关闭 */
@@ -331,6 +333,7 @@ export default {
         })
       })
     },
+    // 字典项查询
     getList() {
       this.listLoading = true
       fetchDicList(this.listQuery).then(response => {
@@ -345,35 +348,11 @@ export default {
         // }, 1.5 * 1000)
       })
     },
+    // 字典树
     getTreeList() {
       fetchList().then(response => {
         this.treeList = response.data
       })
-    },
-    handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
-    },
-    handleModifyStatus(row, status) {
-      this.$message({
-        message: '操作成功',
-        type: 'success'
-      })
-      row.status = status
-    },
-    sortChange(data) {
-      const { prop, order } = data
-      if (prop === 'id') {
-        this.sortByID(order)
-      }
-    },
-    sortByID(order) {
-      if (order === 'ascending') {
-        this.listQuery.sort = '+id'
-      } else {
-        this.listQuery.sort = '-id'
-      }
-      this.handleFilter()
     },
     resetTemp() {
       this.temp = {
@@ -382,13 +361,13 @@ export default {
         remark: '',
         timestamp: new Date(),
         title: '',
-        status: 'published',
         type: ''
       }
     },
     showMsg() {
       this.$message('请选择一个字典')
     },
+    // 弹出新增字典
     handleCreate() {
       this.resetTemp()
       this.dialogStatus = 'create'
@@ -397,27 +376,21 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    handleUpdate() {
-      this.resetTemp()
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
+    // 弹出新增字典项
     teamCreate() {
       if (this.dic_id == null) {
         this.showMsg()
       } else {
-        this.resetTemp()
-        this.dialogStatus = 'update'
+        // this.resetTemp()
+        this.dialogTeamStatus = 'create'
         this.dialogTeamVisible = true
         this.$nextTick(() => {
-          this.$refs['dataForm'].clearValidate()
+          this.$refs['teamForm'].clearValidate()
         })
       }
     },
-    createData() {
+    // 新增字典
+    createDictionary() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
@@ -444,15 +417,36 @@ export default {
         }
       })
     },
-    handleTeamUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
+    // 新增字典项
+    createTeam() {
+      this.$refs['teamForm'].validate((valid) => {
+        if (valid) {
+          // mock a id
+          // this.temp.id = parseInt(Math.random() * 100) + 1024
+          // this.temp.author = 'vue-element-admin'
+          createTeam(this.teamTemp).then((res) => {
+            // this.list.unshift(this.temp)
+            this.dialogFormVisible = false
+            var type = 'success'
+            var msg = '操作成功'
+            if (!res.success) {
+              type = 'error'
+              msg = '操作失败'
+            } else {
+              this.getTreeList()
+            }
+            this.$notify({
+              title: msg,
+              message: res.message,
+              type: type,
+              duration: 2000,
+              showClose: false
+            })
+          })
+        }
       })
     },
+    // 更新字典
     updateDictionary() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
@@ -480,8 +474,44 @@ export default {
         }
       })
     },
+    //  更新字典项
+    updateTeam() {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          const tempData = Object.assign({}, this.temp)
+          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
+          updateTeam(tempData).then((res) => {
+            this.dialogFormVisible = false
+            if (res.success) {
+              this.$notify({
+                title: '成功',
+                message: res.message,
+                type: 'success',
+                duration: 2000
+              })
+              this.getTreeList()
+            } else {
+              this.$notify({
+                title: '失败',
+                message: res.message,
+                type: 'error',
+                duration: 2000
+              })
+            }
+          })
+        }
+      })
+    },
+    handleTeamUpdate(row) {
+      this.temp = Object.assign({}, row) // copy obj
+      this.temp.timestamp = new Date(this.temp.timestamp)
+      this.dialogStatus = 'update'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
     handleDelete(row, index) {
-      // eslint-disable-next-line no-undef
       this.$confirm('确认删除？', '提示', {
         distinguishCancelAndClose: true, /* 是否区分取消和关闭 */
         confirmButtonText: '确定',
@@ -504,13 +534,6 @@ export default {
             ? '取消删除'
             : '取消操作'
         })
-      })
-      /**/
-    },
-    handleFetchPv(pv) {
-      fetchPv(pv).then(response => {
-        this.pvData = response.data.pvData
-        this.dialogPvVisible = true
       })
     },
     handleDownload() {

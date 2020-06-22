@@ -40,9 +40,25 @@ export function createDictionary(data) {
   })
 }
 
+export function createTeam(data) {
+  return request({
+    url: '/dictionaryteams/add',
+    method: 'post',
+    data
+  })
+}
+
 export function updateDictionary(data) {
   return request({
     url: '/dictionary/update',
+    method: 'post',
+    data
+  })
+}
+
+export function updateTeam(data) {
+  return request({
+    url: '/dictionaryteams/update',
     method: 'post',
     data
   })
