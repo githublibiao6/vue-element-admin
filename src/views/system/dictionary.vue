@@ -61,32 +61,38 @@
           :load="load"
           style="width: 100%;"
           :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
-          @sort-change="sortChange"
         >
+          <!-- @sort-change="sortChange" -->
           <el-table-column type="index" width="90" label="序号" />
           <el-table-column label="字典项" prop="id" align="center" width="220px" :class-name="getSortClass('id')">
             <template slot-scope="{row}">
-              <span>{{ row.menuId }}</span>
+              <span>{{ row.dicValue }}</span>
             </template>
           </el-table-column>
           <el-table-column label="字典值" align="center">
             <template slot-scope="{row}">
-              <span>{{ row.url }}</span>
+              <span>{{ row.dicText }}</span>
             </template>
           </el-table-column>
           <el-table-column label="描述" align="center">
             <template slot-scope="{row}">
-              <span>{{ row.menuText }}</span>
+              <span>{{ row.comments }}</span>
             </template>
           </el-table-column>
           <el-table-column label="显示顺序" width="140px" align="center">
             <template slot-scope="{row}">
-              <span>{{ row.icon }}</span>
+              <span>{{ row.sort }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="创建时间" width="180px" align="center">
+            <template slot-scope="{row}">
+              <!-- <span>{{ row.createTime | parseTime('{y}-{m}-{d} {h}:{i}') }}</span> -->
+              <span>{{ row.createTime }}</span>
             </template>
           </el-table-column>
           <el-table-column label="修改时间" width="180px" align="center">
             <template slot-scope="{row}">
-              <span>{{ row.menuType }}</span>
+              <span>{{ row.modifyTime }}</span>
             </template>
           </el-table-column>
           <el-table-column v-if="showReviewer" :label="$t('table.reviewer')" width="110px" align="center">
@@ -126,7 +132,7 @@
         <el-button @click="dialogFormVisible = false">
           取消
         </el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateDictionary()">
+        <el-button type="primary" @click="dialogStatus==='create'?createDictionary():updateDictionary()">
           确定
         </el-button>
       </div>
@@ -135,7 +141,7 @@
     <el-dialog :title="textMap[dialogTeamStatus]" :visible.sync="dialogTeamVisible">
       <el-form ref="teamForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
         <el-form-item label="所属字典" prop="name">
-          <el-input v-model="temp.name" />
+          <el-input v-model="temp.name" :disabled="true" />
         </el-form-item>
         <el-form-item label="字典项" prop="dic_value">
           <el-input v-model="teamTemp.dic_value" />
@@ -154,7 +160,7 @@
         <el-button @click="dialogTeamVisible = false">
           取消
         </el-button>
-        <el-button type="primary" @click="dialogTeamStatus==='create'?createTeam():updateData()">
+        <el-button type="primary" @click="dialogTeamStatus==='create'?createTeam():updateTeam()">
           确定
         </el-button>
       </div>
@@ -393,7 +399,7 @@ export default {
     createDictionary() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
+          // this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
           this.temp.author = 'vue-element-admin'
           createDictionary(this.temp).then((res) => {
             // this.list.unshift(this.temp)
@@ -424,6 +430,7 @@ export default {
           // mock a id
           // this.temp.id = parseInt(Math.random() * 100) + 1024
           // this.temp.author = 'vue-element-admin'
+          this.teamTemp.dic_id = this.dic_id
           createTeam(this.teamTemp).then((res) => {
             // this.list.unshift(this.temp)
             this.dialogFormVisible = false
