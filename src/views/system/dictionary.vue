@@ -303,7 +303,7 @@ export default {
       this.temp = Object.assign({}, data)
       this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
-      this.dialogTeamVisible = true
+      this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
@@ -369,6 +369,14 @@ export default {
         type: ''
       }
     },
+    resetTeamTemp() {
+      this.temp = {
+        id: undefined,
+        dicValue: '',
+        dicText: '',
+        comments: ''
+      }
+    },
     showMsg() {
       this.$message('请选择一个字典')
     },
@@ -429,7 +437,7 @@ export default {
           // mock a id
           // this.temp.id = parseInt(Math.random() * 100) + 1024
           // this.temp.author = 'vue-element-admin'
-          this.teamTemp = {}
+          this.resetTeamTemp()
           this.teamTemp.dic_id = this.dic_id
           createTeam(this.teamTemp).then((res) => {
             // this.list.unshift(this.temp)
@@ -460,7 +468,7 @@ export default {
           const tempData = Object.assign({}, this.temp)
           tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
           updateDictionary(tempData).then((res) => {
-            this.dialogTeamVisible = false
+            this.dialogFormVisible = false
             if (res.success) {
               this.$notify({
                 title: '成功',
@@ -483,12 +491,12 @@ export default {
     },
     //  更新字典项
     updateTeam() {
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs['teamForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.teamTemp)
           tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
           updateTeam(tempData).then((res) => {
-            this.dialogFormVisible = false
+            this.dialogTeamVisible = false
             if (res.success) {
               this.$notify({
                 title: '成功',
@@ -496,7 +504,7 @@ export default {
                 type: 'success',
                 duration: 2000
               })
-              this.getTreeList()
+              this.getList()
             } else {
               this.$notify({
                 title: '失败',
@@ -511,7 +519,6 @@ export default {
     },
     handleTeamUpdate(row) {
       this.teamTemp = Object.assign({}, row) // copy obj
-      console.log(this.teamTemp)
       this.teamTemp.timestamp = new Date(this.teamTemp.timestamp)
       this.dialogTeamStatus = 'update'
       this.dialogTeamVisible = true
@@ -526,7 +533,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(async() => { // 这里加个 async，可以查下相关文档 async...await
-        removeTeam({ pk: row.menuId }).then(() => {
+        removeTeam({ id: row.id }).then(() => {
           this.$notify({
             title: '成功',
             message: '删除成功',
