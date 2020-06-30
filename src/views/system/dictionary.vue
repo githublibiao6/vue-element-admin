@@ -144,16 +144,16 @@
           <el-input v-model="temp.name" :disabled="true" />
         </el-form-item>
         <el-form-item label="字典项" prop="dic_value">
-          <el-input v-model="teamTemp.dic_value" />
+          <el-input v-model="teamTemp.dicValue" />
         </el-form-item>
         <el-form-item label="字典值" prop="dic_text">
-          <el-input v-model="teamTemp.dic_text" />
+          <el-input v-model="teamTemp.dicText" />
         </el-form-item>
         <el-form-item label="排序" prop="sort">
           <el-input v-model="teamTemp.sort" />
         </el-form-item>
         <el-form-item label="描述">
-          <el-input v-model="teamTemp.notes" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
+          <el-input v-model="teamTemp.comments" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -303,8 +303,7 @@ export default {
       this.temp = Object.assign({}, data)
       this.temp.timestamp = new Date(this.temp.timestamp)
       this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      console.log(this.temp)
+      this.dialogTeamVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
@@ -430,17 +429,18 @@ export default {
           // mock a id
           // this.temp.id = parseInt(Math.random() * 100) + 1024
           // this.temp.author = 'vue-element-admin'
+          this.teamTemp = {}
           this.teamTemp.dic_id = this.dic_id
           createTeam(this.teamTemp).then((res) => {
             // this.list.unshift(this.temp)
-            this.dialogFormVisible = false
+            this.dialogTeamVisible = false
             var type = 'success'
             var msg = '操作成功'
             if (!res.success) {
               type = 'error'
               msg = '操作失败'
             } else {
-              this.getTreeList()
+              this.getList()
             }
             this.$notify({
               title: msg,
@@ -460,7 +460,7 @@ export default {
           const tempData = Object.assign({}, this.temp)
           tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
           updateDictionary(tempData).then((res) => {
-            this.dialogFormVisible = false
+            this.dialogTeamVisible = false
             if (res.success) {
               this.$notify({
                 title: '成功',
@@ -485,7 +485,7 @@ export default {
     updateTeam() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const tempData = Object.assign({}, this.temp)
+          const tempData = Object.assign({}, this.teamTemp)
           tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
           updateTeam(tempData).then((res) => {
             this.dialogFormVisible = false
@@ -510,12 +510,13 @@ export default {
       })
     },
     handleTeamUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
+      this.teamTemp = Object.assign({}, row) // copy obj
+      console.log(this.teamTemp)
+      this.teamTemp.timestamp = new Date(this.teamTemp.timestamp)
+      this.dialogTeamStatus = 'update'
+      this.dialogTeamVisible = true
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
+        this.$refs['teamForm'].clearValidate()
       })
     },
     handleDelete(row, index) {
