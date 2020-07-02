@@ -1,16 +1,16 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.menuText" placeholder="菜单名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.menuType" placeholder="菜单类型" clearable style="width: 90px" class="filter-item">
+      <el-input v-model="listQuery.menuText" placeholder="姓名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <!-- <el-select v-model="listQuery.menuType" placeholder="菜单类型" clearable style="width: 90px" class="filter-item">
         <el-option v-for="item in menuTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-      </el-select>
+      </el-select> -->
       <!-- <el-select v-model="listQuery.type" :placeholder="$t('table.type')" clearable class="filter-item" style="width: 130px">
         <el-option v-for="item in menuTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
       </el-select> -->
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
+      <!-- <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select>
+      </el-select> -->
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         {{ $t('table.search') }}
       </el-button>
@@ -36,9 +36,9 @@
       @sort-change="sortChange"
     >
       <el-table-column type="index" width="90" align="center" label="序号" />
-      <el-table-column label="主键" prop="id" align="center" width="220px" :class-name="getSortClass('id')">
+      <el-table-column label="姓名" prop="name" align="center" width="220px" :class-name="getSortClass('id')">
         <template slot-scope="{row}">
-          <span>{{ row.menuId }}</span>
+          <span>{{ row.name }}</span>
         </template>
       </el-table-column>
       <!-- <el-table-column :label="$t('table.date')" width="150px" align="center">
@@ -52,24 +52,24 @@
           <el-tag>{{ row.type | typeFilter }}</el-tag>
         </template>
       </el-table-column> -->
-      <el-table-column label="路径" align="center">
+      <el-table-column label="地址" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.url }}</span>
+          <span>{{ row.position }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="菜单名称" align="center">
+      <el-table-column label="联系方式" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.menuText }}</span>
+          <span>{{ row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="菜单类型" width="110px" align="center">
+      <el-table-column label="备注信息" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.menuType }}</span>
+          <span>{{ row.comments }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="图标" width="140px" align="center">
+      <el-table-column label="开始时间" width="160px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.icon }}</span>
+          <span>{{ row.contractStart }}</span>
         </template>
       </el-table-column>
       <el-table-column v-if="showReviewer" :label="$t('table.reviewer')" width="110px" align="center">
@@ -117,22 +117,22 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="类型" prop="menuType">
+        <!-- <el-form-item label="类型" prop="menuType">
           <el-select v-model="temp.menuType" class="filter-item" placeholder="Please select">
             <el-option v-for="item in menuTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
         <!-- <el-form-item :label="$t('table.date')" prop="timestamp">
           <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
         </el-form-item> -->
-        <el-form-item label="主键" prop="menuId">
-          <el-input v-model="temp.menuId" />
+        <el-form-item label="姓名" prop="name">
+          <el-input v-model="temp.name" />
         </el-form-item>
-        <el-form-item label="路径" prop="url">
-          <el-input v-model="temp.url" />
+        <el-form-item label="地址" prop="position">
+          <el-input v-model="temp.position" />
         </el-form-item>
-        <el-form-item label="菜单名" prop="menuText">
-          <el-input v-model="temp.menuText" />
+        <el-form-item label="联系方式" prop="phone">
+          <el-input v-model="temp.phone" />
         </el-form-item>
         <!-- <el-form-item :label="$t('table.status')">
           <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
@@ -142,8 +142,8 @@
         <el-form-item :label="$t('table.importance')">
           <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;" />
         </el-form-item> -->
-        <el-form-item label="描述">
-          <el-input v-model="temp.notes" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
+        <el-form-item label="备注信息">
+          <el-input v-model="temp.comments" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="请输入" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -169,7 +169,7 @@
 </template>
 
 <script>
-import { fetchList, fetchPv, createMenu, updateMenu, deleteMenu } from '@/api/menu'
+import { fetchList, fetchPv, createUser, updateUser, deleteUser } from '@/api/user'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -312,7 +312,7 @@ export default {
         if (valid) {
           this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
           this.temp.author = 'vue-element-admin'
-          createMenu(this.temp).then((res) => {
+          createUser(this.temp).then((res) => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
             if (res.success) {
@@ -349,7 +349,7 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateMenu(tempData).then((res) => {
+          updateUser(tempData).then((res) => {
             const index = this.list.findIndex(v => v.id === this.temp.id)
             this.list.splice(index, 1, this.temp)
             this.dialogFormVisible = false
@@ -374,14 +374,28 @@ export default {
       })
     },
     handleDelete(row, index) {
-      deleteMenu({ pk: row.menuId }).then(() => {
-        this.$notify({
-          title: '成功',
-          message: '删除成功',
-          type: 'success',
-          duration: 2000
+      this.$confirm('确认删除？', '提示', {
+        distinguishCancelAndClose: true, /* 是否区分取消和关闭 */
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async() => { // 这里加个 async，可以查下相关文档 async...await
+        deleteUser({ pk: row.id }).then(() => {
+          this.$notify({
+            title: '成功',
+            message: '删除成功',
+            type: 'success',
+            duration: 2000
+          })
+          this.list.splice(index, 1)
         })
-        this.list.splice(index, 1)
+      }).catch(action => {
+        this.$message({
+          type: 'info',
+          message: action === 'cancel'
+            ? '取消删除'
+            : '取消操作'
+        })
       })
     },
     handleFetchPv(pv) {
