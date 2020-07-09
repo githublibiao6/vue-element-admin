@@ -2,21 +2,29 @@ import request from '@/utils/request'
 
 export function getRoutes() {
   return request({
-    url: '/routes',
+    url: 'menu/listMap',
     method: 'get'
   })
 }
 
 export function getRoles() {
   return request({
-    url: '/roles',
+    url: 'roles/list',
     method: 'get'
+  })
+}
+
+export function getMenuByRoleId(role_id) {
+  return request({
+    url: 'roles/listMenusByRoleId',
+    method: 'get',
+    params: { role_id }
   })
 }
 
 export function addRole(data) {
   return request({
-    url: '/role',
+    url: '/roles/add',
     method: 'post',
     data
   })
@@ -24,7 +32,7 @@ export function addRole(data) {
 
 export function updateRole(id, data) {
   return request({
-    url: `/role/${id}`,
+    url: `/roles/update`,
     method: 'put',
     data
   })
@@ -32,7 +40,8 @@ export function updateRole(id, data) {
 
 export function deleteRole(id) {
   return request({
-    url: `/role/${id}`,
-    method: 'delete'
+    url: `/roles/delete`,
+    method: 'delete',
+    params: { id }
   })
 }
