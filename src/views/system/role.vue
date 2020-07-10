@@ -251,19 +251,19 @@ export default {
       } else {
         console.log(this.role)
         const { data } = await addRole(this.role)
-        this.role.key = data.key
+        this.role.code = data.code
         this.rolesList.push(this.role)
       }
 
-      const { description, key, name } = this.role
+      const { comments, code, name } = this.role
       this.dialogVisible = false
       this.$notify({
         title: 'Success',
         dangerouslyUseHTMLString: true,
         message: `
-            <div>Role Key: ${key}</div>
+            <div>Role Key: ${code}</div>
             <div>Role Name: ${name}</div>
-            <div>Description: ${description}</div>
+            <div>Description: ${comments}</div>
           `,
         type: 'success'
       })
