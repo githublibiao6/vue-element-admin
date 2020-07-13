@@ -20,7 +20,7 @@
                 <account :user="user" />
               </el-tab-pane>
               <el-tab-pane label="Evm" name="evm">
-                <Evm />
+                <Evm :user="user" />
               </el-tab-pane>
             </el-tabs>
           </el-card>
@@ -50,6 +50,7 @@ export default {
   },
   computed: {
     ...mapGetters([
+      'id',
       'name',
       'avatar',
       'roles'
@@ -61,7 +62,9 @@ export default {
   methods: {
     getUser() {
       this.user = {
+        id: this.id,
         name: this.name,
+        introduction: this.introduction,
         role: this.roles.join(' | '),
         email: 'admin@test.com',
         avatar: this.avatar
