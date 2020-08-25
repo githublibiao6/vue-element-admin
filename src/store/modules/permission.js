@@ -1,4 +1,5 @@
 import { asyncRoutes, constantRoutes } from '@/router'
+import { fixedRoutes } from '@/router/fixed'
 import request from '@/utils/request'
 import Layout from '@/layout'
 
@@ -58,6 +59,7 @@ const actions = {
       } else {
         accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
       }
+      console.log(222)
       commit('SET_ROUTES', accessedRoutes)
       resolve(accessedRoutes)
     })
@@ -111,8 +113,9 @@ const actions = {
           }
         })
         convertTree(menuRouters, data)
-        commit('SET_ROUTES', menuRouters)
-        resolve(menuRouters)
+        const routers = menuRouters.concat(fixedRoutes)
+        commit('SET_ROUTES', routers)
+        resolve(routers)
       })
 
       // 定义一个递归方法

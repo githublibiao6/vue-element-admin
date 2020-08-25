@@ -44,10 +44,10 @@
                   <el-form-item label-width="90px" label="Importance:" class="postInfo-container-item">
                     <el-rate
                       v-model="postForm.importance"
-                      :max="3"
+                      :max="5"
                       :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
                       :low-threshold="1"
-                      :high-threshold="3"
+                      :high-threshold="5"
                       style="display:inline-block"
                     />
                   </el-form-item>
