@@ -8,6 +8,14 @@ export function fetchList(query) {
   })
 }
 
+export function listUser(query) {
+  return request({
+    url: '/user/list',
+    method: 'get',
+    params: query
+  })
+}
+
 export function createUser(data) {
   return request({
     url: '/user/add',

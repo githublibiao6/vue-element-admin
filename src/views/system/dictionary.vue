@@ -370,7 +370,7 @@ export default {
       }
     },
     resetTeamTemp() {
-      this.temp = {
+      this.teamTemp = {
         id: undefined,
         dicValue: '',
         dicText: '',
@@ -394,7 +394,7 @@ export default {
       if (this.dic_id == null) {
         this.showMsg()
       } else {
-        // this.resetTemp()
+        this.resetTeamTemp()
         this.dialogTeamStatus = 'create'
         this.dialogTeamVisible = true
         this.$nextTick(() => {

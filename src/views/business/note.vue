@@ -45,7 +45,7 @@
         <template slot-scope="scope">
           <router-link :to="'/business/edit/'+scope.row.id">
             <el-button type="primary" size="small" icon="el-icon-edit">
-              Edit
+              编辑
             </el-button>
           </router-link>
         </template>

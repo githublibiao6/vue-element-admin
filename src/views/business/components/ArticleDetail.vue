@@ -6,17 +6,15 @@
         <PlatformDropdown v-model="postForm.platforms" />
         <SourceUrlDropdown v-model="postForm.source_uri" />
         <el-button v-loading="loading" style="margin-left: 10px;" type="success" @click="submitForm">
-          Publish
+          发布
         </el-button>
         <el-button v-loading="loading" type="warning" @click="draftForm">
-          Draft
+          草案
         </el-button>
       </sticky>
-
       <div class="createPost-main-container">
         <el-row>
-          <Warning />
-
+          <!-- <Warning /> -->
           <el-col :span="24">
             <el-form-item style="margin-bottom: 40px;" prop="title">
               <MDinput v-model="postForm.title" :maxlength="100" name="name" required>
@@ -80,9 +78,9 @@ import Upload from '@/components/Upload/SingleImage3'
 import MDinput from '@/components/MDinput'
 import Sticky from '@/components/Sticky' // 粘性header组件
 import { validURL } from '@/utils/validate'
-import { fetchArticle } from '@/api/article'
-import { searchUser } from '@/api/remote-search'
-import Warning from './Warning'
+import { fetchArticle, updateArticle } from '@/api/article'
+import { listUser } from '@/api/user'
+// import Warning from './Warning'
 import { CommentDropdown, PlatformDropdown, SourceUrlDropdown } from './Dropdown'
 
 const defaultForm = {
@@ -101,7 +99,7 @@ const defaultForm = {
 
 export default {
   name: 'ArticleDetail',
-  components: { Tinymce, MDinput, Upload, Sticky, Warning, CommentDropdown, PlatformDropdown, SourceUrlDropdown },
+  components: { Tinymce, MDinput, Upload, Sticky, CommentDropdown, PlatformDropdown, SourceUrlDropdown },
   props: {
     isEdit: {
       type: Boolean,
@@ -211,11 +209,23 @@ export default {
       this.$refs.postForm.validate(valid => {
         if (valid) {
           this.loading = true
-          this.$notify({
-            title: '成功',
-            message: '发布文章成功',
-            type: 'success',
-            duration: 2000
+          updateArticle(this.postForm).then((res) => {
+            if (res.success) {
+              this.$notify({
+                title: '成功',
+                message: '发布文章成功',
+                type: 'success',
+                duration: 2000
+              })
+              this.getList()
+            } else {
+              this.$notify({
+                title: '失败',
+                message: res.message,
+                type: 'error',
+                duration: 2000
+              })
+            }
           })
           this.postForm.status = 'published'
           this.loading = false
@@ -226,7 +236,8 @@ export default {
       })
     },
     draftForm() {
-      if (this.postForm.content.length === 0 || this.postForm.title.length === 0) {
+      console.log(this.postForm)
+      if (this.postForm.article.length === 0 || this.postForm.title.length === 0) {
         this.$message({
           message: '请填写必要的标题和内容',
           type: 'warning'
@@ -242,9 +253,11 @@ export default {
       this.postForm.status = 'draft'
     },
     getRemoteUserList(query) {
-      searchUser(query).then(response => {
-        if (!response.data.items) return
-        this.userListOptions = response.data.items.map(v => v.name)
+      console.log(query)
+      listUser({ name: query }).then(response => {
+        if (!response.success) return
+        this.userListOptions = response.data.map(v => v.name)
+        console.log()
       })
     }
   }
